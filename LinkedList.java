@@ -54,8 +54,11 @@ public class LinkedList {
 			throw new IllegalArgumentException(
 					"index must be between 0 and size");
 		}
-		//// Replace the following statement with your code
-		return null;
+		Node placement = this.first;
+		for (int i = 0; i <= index; i ++){
+			placement = placement.next;
+		}
+		return placement;
 	}
 	
 	/**
@@ -78,7 +81,28 @@ public class LinkedList {
 	 *         if index is negative or greater than the list's size
 	 */
 	public void add(int index, MemoryBlock block) {
-		//// Write your code here
+		if (index < 0 || index > size){
+			throw new IllegalArgumentException ("index must be between 0 and size");
+		}
+		
+		Node memoryNode = new Node(block);
+		if (index == 0){
+			memoryNode.next = this.first;
+			this.first = memoryNode;
+			size ++;
+		} else{
+			if (index == size){
+				memoryNode.next = null;
+				this.last.next = memoryNode;
+				this.last = memoryNode;
+				size ++;
+			} else {
+				Node prevIndex = this.getNode(index - 1);
+				memoryNode.next = prevIndex.next;
+				prevIndex.next = memoryNode;
+				size ++;
+			}
+		}
 	}
 
 	/**
@@ -89,7 +113,10 @@ public class LinkedList {
 	 *        the given memory block
 	 */
 	public void addLast(MemoryBlock block) {
-		//// Write your code here
+		if (block == null){
+			throw new IllegalArgumentException ("block is null");
+		}
+		this.add(this.size, block);
 	}
 	
 	/**
@@ -100,7 +127,10 @@ public class LinkedList {
 	 *        the given memory block
 	 */
 	public void addFirst(MemoryBlock block) {
-		//// Write your code here
+		if (block == null){
+			throw new IllegalArgumentException ("block is null");
+		}
+		this.add(0, block);
 	}
 
 	/**
@@ -113,8 +143,10 @@ public class LinkedList {
 	 *         if index is negative or greater than or equal to size
 	 */
 	public MemoryBlock getBlock(int index) {
-		//// Replace the following statement with your code
-		return null;
+		if (index < 0 || index > this.size){
+			throw new IllegalArgumentException ("index must be between 0 and size");
+		} 
+		return this.getNode(index).block;
 	}	
 
 	/**
@@ -125,7 +157,17 @@ public class LinkedList {
 	 * @return the index of the block, or -1 if the block is not in this list
 	 */
 	public int indexOf(MemoryBlock block) {
-		//// Replace the following statement with your code
+		if (block == null){
+			return -1;
+		}
+		Node findBlock = this.first;
+		int index = 0;
+		while (findBlock != null){
+			if (findBlock.equals(block)){
+				return index;
+			}
+			index++;
+		}
 		return -1;
 	}
 
@@ -136,7 +178,25 @@ public class LinkedList {
 	 *        the node that will be removed from this list
 	 */
 	public void remove(Node node) {
-		//// Write your code here
+		if (node == null){
+			throw new IllegalArgumentException ("node is null");
+		}
+		if (node == this.first){
+			this.first = this.first.next;
+			size--;
+		} else {
+			Node prev = this.first;
+			while (prev != null && prev.next != node) {
+				prev = prev.next;
+			}
+			if (prev.next == null){
+				prev.next = null;
+				this.last = prev;
+			} else{
+				prev.next = prev.next.next;
+			}
+			size--;
+		}
 	}
 
 	/**
@@ -147,7 +207,7 @@ public class LinkedList {
 	 *         if index is negative or greater than or equal to size
 	 */
 	public void remove(int index) {
-		//// Write your code here
+		this.remove(this.getNode(index));
 	}
 
 	/**
@@ -158,7 +218,11 @@ public class LinkedList {
 	 *         if the given memory block is not in this list
 	 */
 	public void remove(MemoryBlock block) {
-		//// Write your code here
+		int index = this.indexOf(block);
+		if (index == -1){
+			throw new IllegalArgumentException ("This memory block is not in this list");
+		}
+		this.remove(index);
 	}	
 
 	/**
@@ -172,7 +236,15 @@ public class LinkedList {
 	 * A textual representation of this list, for debugging.
 	 */
 	public String toString() {
-		//// Replace the following statement with your code
-		return "";
+		if (size == 0){
+			return "()";
+		}
+		StringBuilder sb = new StringBuilder();
+		Node allList = this.first;
+		while (allList != null){
+			sb.append(allList.block.toString());
+			allList = allList.next;
+		}
+		return sb.toString();
 	}
 }

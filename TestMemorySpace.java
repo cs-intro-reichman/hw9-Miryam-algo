@@ -16,7 +16,7 @@ public class TestMemorySpace {
         System.out.println("All tests completed successfully!");
     }
 
-    private static void testInitialization() {
+    private static void testInitialization() {  
         MemorySpace memory = new MemorySpace(100);
         String expected = "(0 , 100)\n";
         assertString(expected, memory.toString(), "Initialization");

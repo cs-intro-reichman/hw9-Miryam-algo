@@ -57,9 +57,37 @@ public class MemorySpace {
 	 *        the length (in words) of the memory block that has to be allocated
 	 * @return the base address of the allocated block, or -1 if unable to allocate
 	 */
-	public int malloc(int length) {		
-		//// Replace the following statement with your code
-		return -1;
+	public int malloc(int length) {
+		if (length <= 0){
+			return -1;
+		}
+		Node findLength = this.freeList.getFirst();
+		int min = -1;
+		Node keeper = this.freeList.getFirst();
+		while (findLength != null){
+			if (findLength.block.length == length){
+				MemoryBlock buildBlock = new MemoryBlock(findLength.block.baseAddress, length);
+				this.allocatedList.addLast(buildBlock);
+				allocatedList.remove(findLength);
+				return findLength.block.baseAddress;
+			}
+			//if the length found is larger than length we save the langth of words
+			//and the node pointing to it in order to find the minimum value
+			if (findLength.block.length > length && findLength.block.length < min){
+				min = findLength.block.length;
+				keeper = findLength;
+				}
+			findLength = findLength.next;
+			}
+			if (min == -1){
+				return -1;
+			}
+			MemoryBlock blockBuild = new MemoryBlock(keeper.block.baseAddress, length);
+			this.allocatedList.addLast(blockBuild);
+			int saveBaseAddress = keeper.block.baseAddress;
+			keeper.block.updateBaseAddress(length);
+			keeper.block.updateLength(length);
+		return saveBaseAddress;
 	}
 
 	/**
@@ -71,7 +99,14 @@ public class MemorySpace {
 	 *            the starting address of the block to freeList
 	 */
 	public void free(int address) {
-		//// Write your code here
+		Node findAdress = this.allocatedList.getFirst();
+		while (findAdress != null){
+			if (findAdress.block.baseAddress == address){
+				MemoryBlock moveBlock = new MemoryBlock(findAdress.block.baseAddress, findAdress.block.length);
+				this.freeList.addLast(moveBlock);
+				this.allocatedList.remove(findAdress);
+			}
+		}
 	}
 	
 	/**

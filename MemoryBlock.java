@@ -31,6 +31,18 @@ public class MemoryBlock {
 		return baseAddress == other.baseAddress && length == other.length;
 	}
 
+	public void updateBaseAddress(int value){
+		this.baseAddress = this.baseAddress + value;
+	}
+
+	
+	public void updateLength(int value){
+		if (this.length - value <= 0){
+			throw new IllegalArgumentException ("can't update the length");
+		}
+		this.length = this.length - value;
+	}
+
 	/**
 	 * A textual representation of this memory block, for debugging.
 	 * The block's contents appears within parentheses.
