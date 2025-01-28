@@ -1,3 +1,5 @@
+
+
 /**
  * Represents a managed memory space. The memory space manages a list of allocated 
  * memory blocks, and a list free memory blocks. The methods "malloc" and "free" are 
@@ -58,36 +60,26 @@ public class MemorySpace {
 	 * @return the base address of the allocated block, or -1 if unable to allocate
 	 */
 	public int malloc(int length) {
+
 		if (length <= 0){
 			return -1;
 		}
-		Node findLength = this.freeList.getFirst();
-		int min = -1;
-		Node keeper = this.freeList.getFirst();
-		while (findLength != null){
-			if (findLength.block.length == length){
-				MemoryBlock buildBlock = new MemoryBlock(findLength.block.baseAddress, length);
+		
+		for (int i = 0; i < this.freeList.getSize(); i++){
+			MemoryBlock currentBlock = freeList.getBlock(i);
+			if (length <= currentBlock.length){
+				MemoryBlock buildBlock = new MemoryBlock(currentBlock.baseAddress, length);
 				this.allocatedList.addLast(buildBlock);
-				allocatedList.remove(findLength);
-				return findLength.block.baseAddress;
-			}
-			//if the length found is larger than length we save the langth of words
-			//and the node pointing to it in order to find the minimum value
-			if (findLength.block.length > length && findLength.block.length < min){
-				min = findLength.block.length;
-				keeper = findLength;
+				if (length == currentBlock.length){
+					this.freeList.remove(currentBlock);
+				} else{
+					currentBlock.length -= length;
+					currentBlock.baseAddress += length;
 				}
-			findLength = findLength.next;
+				return buildBlock.baseAddress;
 			}
-			if (min == -1){
-				return -1;
-			}
-			MemoryBlock blockBuild = new MemoryBlock(keeper.block.baseAddress, length);
-			this.allocatedList.addLast(blockBuild);
-			int saveBaseAddress = keeper.block.baseAddress;
-			keeper.block.updateBaseAddress(length);
-			keeper.block.updateLength(length);
-		return saveBaseAddress;
+		}
+		return -1;
 	}
 
 	/**
@@ -99,21 +91,27 @@ public class MemorySpace {
 	 *            the starting address of the block to freeList
 	 */
 	public void free(int address) {
-		Node findAdress = this.allocatedList.getFirst();
-		while (findAdress != null){
-			if (findAdress.block.baseAddress == address){
-				MemoryBlock moveBlock = new MemoryBlock(findAdress.block.baseAddress, findAdress.block.length);
-				this.freeList.addLast(moveBlock);
-				this.allocatedList.remove(findAdress);
+
+		if (freeList.getSize() == 1 && freeList.getFirst().block.baseAddress == 0 && freeList.getFirst().block.length == 100){
+			throw new IllegalArgumentException ("index must be between 0 and size");
+		}
+
+		for (int i = 0; i < this.allocatedList.getSize(); i++){
+			MemoryBlock currentBlock = this.allocatedList.getBlock(i);
+			if (currentBlock.baseAddress == address){
+				this.freeList.addLast(currentBlock);
+				this.allocatedList.remove(currentBlock);
+				return;
 			}
 		}
 	}
-	
+
 	/**
 	 * A textual representation of the free list and the allocated list of this memory space, 
 	 * for debugging purposes.
 	 */
 	public String toString() {
+
 		return freeList.toString() + "\n" + allocatedList.toString();		
 	}
 	
@@ -123,7 +121,25 @@ public class MemorySpace {
 	 * In this implementation Malloc does not call defrag.
 	 */
 	public void defrag() {
-		/// TODO: Implement defrag test
-		//// Write your code here
+
+		Node current = this.freeList.getFirst();
+		while (current != null) {
+			Node next = current.next;
+			while (next != null){
+				if (next.block.baseAddress == (current.block.baseAddress + current.block.length)){
+					current.block.length += next.block.length;
+					this.freeList.remove(next.block);
+					next = current.next;
+				} else if (current.block.baseAddress == (next.block.baseAddress + next.block.length)){
+					current.block.baseAddress = next.block.baseAddress;
+					current.block.length += next.block.length;
+					this.freeList.remove(next.block);
+					next = current.next;
+				} else{ 
+					next = next.next;
+				}
+			}
+			current = current.next;
+		}
 	}
 }

@@ -50,17 +50,19 @@ public class LinkedList {
 	 * @return the node at the given index
 	 */		
 	public Node getNode(int index) {
+
 		if (index < 0 || index > size) {
 			throw new IllegalArgumentException(
 					"index must be between 0 and size");
 		}
 		Node placement = this.first;
-		for (int i = 0; i <= index; i ++){
+		for (int i = 0; i < index; i ++){
 			placement = placement.next;
 		}
 		return placement;
 	}
 	
+
 	/**
 	 * Creates a new Node object that points to the given memory block, 
 	 * and inserts the node at the given index in this list.
@@ -80,29 +82,28 @@ public class LinkedList {
 	 * @throws IllegalArgumentException
 	 *         if index is negative or greater than the list's size
 	 */
+	
 	public void add(int index, MemoryBlock block) {
-		if (index < 0 || index > size){
+
+		if (index < 0 || index > size) {
 			throw new IllegalArgumentException ("index must be between 0 and size");
 		}
-		
 		Node memoryNode = new Node(block);
-		if (index == 0){
-			memoryNode.next = this.first;
-			this.first = memoryNode;
-			size ++;
-		} else{
-			if (index == size){
-				memoryNode.next = null;
-				this.last.next = memoryNode;
-				this.last = memoryNode;
-				size ++;
-			} else {
-				Node prevIndex = this.getNode(index - 1);
-				memoryNode.next = prevIndex.next;
-				prevIndex.next = memoryNode;
-				size ++;
-			}
+
+		if (index == 0) {
+			addFirst(block);
+			return;
 		}
+
+		if (index == size) {
+			addLast(block);
+			return;
+		}
+
+		Node prev = getNode(index - 1);
+		memoryNode.next = prev.next;
+		prev.next = memoryNode;
+		this.size++;
 	}
 
 	/**
@@ -112,11 +113,20 @@ public class LinkedList {
 	 * @param block
 	 *        the given memory block
 	 */
+
 	public void addLast(MemoryBlock block) {
-		if (block == null){
-			throw new IllegalArgumentException ("block is null");
+
+		Node memoryNode = new Node(block);
+
+		if (this.size == 0) {
+			this.first = memoryNode;
+			this.last = memoryNode;
+			this.size++;
+			return;
 		}
-		this.add(this.size, block);
+		this.last.next = memoryNode;
+		this.last = memoryNode;
+		this.size++;
 	}
 	
 	/**
@@ -126,13 +136,23 @@ public class LinkedList {
 	 * @param block
 	 *        the given memory block
 	 */
-	public void addFirst(MemoryBlock block) {
-		if (block == null){
-			throw new IllegalArgumentException ("block is null");
-		}
-		this.add(0, block);
-	}
 
+	public void addFirst(MemoryBlock block){
+
+		Node memoryNode = new Node(block);
+
+		if (this.size == 0) {
+			this.first = memoryNode;
+			this.last = memoryNode;
+			this.size++;
+			return;
+		}
+
+		memoryNode.next = this.first;
+		this.first = memoryNode;
+		this.size++;
+	}
+	
 	/**
 	 * Gets the memory block located at the given index in this list.
 	 * 
@@ -143,11 +163,16 @@ public class LinkedList {
 	 *         if index is negative or greater than or equal to size
 	 */
 	public MemoryBlock getBlock(int index) {
-		if (index < 0 || index > this.size){
+
+		if (index < 0 || index > this.size || this.size == 0){
 			throw new IllegalArgumentException ("index must be between 0 and size");
-		} 
-		return this.getNode(index).block;
-	}	
+		}
+		Node nodeIndex = this.getNode(index);
+		if (nodeIndex == null){
+			return null;
+		}
+		return nodeIndex.block;
+	}
 
 	/**
 	 * Gets the index of the node pointing to the given memory block.
@@ -157,16 +182,16 @@ public class LinkedList {
 	 * @return the index of the block, or -1 if the block is not in this list
 	 */
 	public int indexOf(MemoryBlock block) {
+
 		if (block == null){
 			return -1;
 		}
-		Node findBlock = this.first;
-		int index = 0;
-		while (findBlock != null){
-			if (findBlock.equals(block)){
-				return index;
+		Node p = this.first;
+		for(int i = 0 ; i < size; i++){
+			if(p.block.equals(block)){
+				return i;
 			}
-			index++;
+			p = p.next;
 		}
 		return -1;
 	}
@@ -178,24 +203,32 @@ public class LinkedList {
 	 *        the node that will be removed from this list
 	 */
 	public void remove(Node node) {
+
 		if (node == null){
-			throw new IllegalArgumentException ("node is null");
+			throw new IllegalArgumentException (" NullPointerException!");
 		}
-		if (node == this.first){
+		if (node.block.equals(this.first.block)){
+			if (this.size == 1){
+				this.first = null;
+				this.last = this.first;
+				this.size--;
+				return;
+			}
 			this.first = this.first.next;
 			size--;
-		} else {
-			Node prev = this.first;
-			while (prev != null && prev.next != node) {
-				prev = prev.next;
+			return;
+		}
+		Node prev = this.first;
+		for(int i = 0; i < this.size; i++){
+			if(node.block.equals(prev.next.block)){
+				prev.next=prev.next.next;
+				size--;
+				if(i == size - 1){
+					this.last=prev;
+				}
+				return;
 			}
-			if (prev.next == null){
-				prev.next = null;
-				this.last = prev;
-			} else{
-				prev.next = prev.next.next;
-			}
-			size--;
+			prev = prev.next;
 		}
 	}
 
@@ -207,6 +240,7 @@ public class LinkedList {
 	 *         if index is negative or greater than or equal to size
 	 */
 	public void remove(int index) {
+
 		this.remove(this.getNode(index));
 	}
 
@@ -218,12 +252,13 @@ public class LinkedList {
 	 *         if the given memory block is not in this list
 	 */
 	public void remove(MemoryBlock block) {
+
 		int index = this.indexOf(block);
 		if (index == -1){
-			throw new IllegalArgumentException ("This memory block is not in this list");
+			throw new IllegalArgumentException ("index must be between 0 and size");
 		}
 		this.remove(index);
-	}	
+	}
 
 	/**
 	 * Returns an iterator over this list, starting with the first element.
@@ -236,15 +271,13 @@ public class LinkedList {
 	 * A textual representation of this list, for debugging.
 	 */
 	public String toString() {
-		if (size == 0){
-			return "()";
+
+		String s = "";
+		Node current = this.first;
+		while (current != null) {
+			s = s + current.block + " ";
+			current = current.next;
 		}
-		StringBuilder sb = new StringBuilder();
-		Node allList = this.first;
-		while (allList != null){
-			sb.append(allList.block.toString());
-			allList = allList.next;
+		return s;
 		}
-		return sb.toString();
 	}
-}
